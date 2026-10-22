@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -118,6 +118,7 @@ namespace _1RM.View.Host.ProtocolHosts
         private const int MAX_RETRY_COUNT = 5;
         private void OnRdpClientDisconnected(object sender, IMsTscAxEvents_OnDisconnectedEvent e)
         {
+            StopDesktopPreview(false);
             SimpleLogHelper.Debug("RDP Host: RdpOnDisconnected");
 
             lock (this)
@@ -237,6 +238,7 @@ namespace _1RM.View.Host.ProtocolHosts
 
         private void OnRdpClientLoginComplete(object? sender, EventArgs e)
         {
+            StartDesktopPreview();
             SimpleLogHelper.Debug("RDP Host:  OnRdpClientLoginComplete");
 
             OnCanResizeNowChanged?.Invoke();

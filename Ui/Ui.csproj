@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <ItemGroup>
+        <EmbeddedResource Include="CompatibilitySalt.private" LogicalName="1Remote.CompatibilitySalt" Condition="Exists('CompatibilitySalt.private')" />
+    </ItemGroup>
     <PropertyGroup>
         <OutputType Condition="'$(Configuration)'=='Debug'">Exe</OutputType>
         <OutputType Condition="'$(Configuration)'=='StoreDebug'">Exe</OutputType>
@@ -92,7 +95,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <AssemblyVersion>1.3.1.11016</AssemblyVersion>
+        <AssemblyVersion>1.3.1.11022</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <Version>$(AssemblyVersion)</Version>
         <Authors>Shawn Veck</Authors>

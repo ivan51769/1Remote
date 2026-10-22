@@ -345,3 +345,10 @@ healthchecksdb
 /Ui/Resources/PuTTY
 /Ui/Resources/Languages/glossary_translated_by_google
 /StorePackages
+# Local compatibility value read from the user's original executable; never commit it.
+*.private
+# Portable runtime data and local desktop captures are never source artifacts.
+1Remote.db*
+1Remote.json
+DesktopPreviews/
+1Remote.previous-*.exe

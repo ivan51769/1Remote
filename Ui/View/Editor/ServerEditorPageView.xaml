@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="_1RM.View.Editor.ServerEditorPageView"
+<UserControl x:Class="_1RM.View.Editor.ServerEditorPageView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -16,26 +16,37 @@
              xmlns:controls2="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance editor:ServerEditorPageViewModel}"
-             Background="White"
+             Background="#F5F7FA"
+             UseLayoutRounding="True" SnapsToDevicePixels="True"
+             TextOptions.TextFormattingMode="Display"
              d:DesignHeight="1000" d:DesignWidth="800">
 
-    <Grid Background="{DynamicResource BackgroundBrush}" ClipToBounds="True">
+    <UserControl.Resources>
+        <FontFamily x:Key="GlobalFontFamily">Microsoft YaHei UI</FontFamily>
+        <system:Double x:Key="GlobalFontSizeBody">13</system:Double>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="White"/>
+        <SolidColorBrush x:Key="BackgroundTextBrush" Color="#263C50"/>
+        <SolidColorBrush x:Key="DefaultBorderBrush" Color="#B8C6D2"/>
+        <SolidColorBrush x:Key="PrimaryMidBrush" Color="#EDF3F7"/>
+        <SolidColorBrush x:Key="PrimaryTextBrush" Color="#263C50"/>
+    </UserControl.Resources>
+    <Grid Background="#F5F7FA" ClipToBounds="True">
         <Grid.Resources>
-            <system:Double x:Key="TopHeight">20</system:Double>
-            <system:Double x:Key="BottomHeight">40</system:Double>
+            <system:Double x:Key="TopHeight">34</system:Double>
+            <system:Double x:Key="BottomHeight">44</system:Double>
         </Grid.Resources>
         <Grid>
             <Grid.Resources>
                 <Style TargetType="TextBlock" x:Key="RowHeader" BasedOn="{StaticResource TextBlockBase}">
                     <Setter Property="Foreground" Value="{DynamicResource BackgroundTextBrush}"></Setter>
-                    <Setter Property="MinWidth" Value="150"></Setter>
+                    <Setter Property="Width" Value="128"></Setter>
                     <Setter Property="VerticalAlignment" Value="Center"></Setter>
                     <Setter Property="HorizontalAlignment" Value="Left"></Setter>
                     <Setter Property="TextAlignment" Value="Right"></Setter>
                     <Setter Property="TextWrapping" Value="WrapWithOverflow"></Setter>
                     <Setter Property="Margin">
                         <Setter.Value>
-                            <Thickness Right="30"></Thickness>
+                            <Thickness Right="16"></Thickness>
                         </Setter.Value>
                     </Setter>
                 </Style>
@@ -44,7 +55,7 @@
                     <Setter Property="MinHeight" Value="30"></Setter>
                     <Setter Property="Margin">
                         <Setter.Value>
-                            <Thickness Bottom="0" Top="15"></Thickness>
+                            <Thickness Bottom="0" Top="8"></Thickness>
                         </Setter.Value>
                     </Setter>
                 </Style>
@@ -55,16 +66,21 @@
 
             <ScrollViewer Grid.IsSharedSizeScope="True"
                           x:Name="ScrollViewerMain"
-                          Margin="0 3 0 4"
+                          Margin="24 4 24 8"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Auto">
-                <Grid>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Style="{StaticResource EditorGroupTextBlockTitle}" Text="{DynamicResource server_editor_group_title_common}"></TextBlock>
-
-
-                        <Grid>
-                            <StackPanel Orientation="Vertical">
+                <StackPanel MaxWidth="1280" HorizontalAlignment="Stretch">
+                    <TextBlock Style="{StaticResource EditorGroupTextBlockTitle}" Text="{DynamicResource server_editor_group_title_common}"/>
+                    <Grid x:Name="OverviewGrid" SizeChanged="OverviewGrid_OnSizeChanged">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition x:Name="OverviewFieldsColumn" Width="500"/>
+                            <ColumnDefinition x:Name="OverviewNoteColumn" Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel>
                                 <controls:GridWith4Columns>
                                     <TextBlock Grid.Column="0" Text="{DynamicResource Name}" Style="{StaticResource RowHeader}"></TextBlock>
                                     <controls:AutoCompleteComboBox Grid.Column="1"
@@ -77,10 +93,10 @@
                                     <TextBlock Style="{StaticResource RowHeader}" Grid.Column="0" Text="{DynamicResource Icon}"></TextBlock>
 
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <Grid Name="GridLogo" Width="64" Height="64"
+                                        <Grid Name="GridLogo" Width="44" Height="44"
                                               Background="Transparent"
                                               Cursor="Hand"
-                                              Margin="0 0 30 0">
+                                              Margin="0 0 20 0">
                                             <Border BorderThickness="1" CornerRadius="{StaticResource DefaultCornerRadius}" 
                                                     ClipToBounds="True">
                                                 <Border.Style>
@@ -94,7 +110,7 @@
                                                     </Style>
                                                 </Border.Style>
                                                 <Grid>
-                                                    <Image Height="64" Width="64" Source="{Binding Server.IconImg}" ></Image>
+                                                    <Image Height="44" Width="44" Source="{Binding Server.IconImg}" ></Image>
 
                                                     <Button Background="{DynamicResource BackgroundBrush}" Opacity="0.9"
                                                             Command="{Binding CmdSelectImage}"
@@ -150,15 +166,70 @@
 
                                 <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                     <TextBlock Text="" Style="{StaticResource RowHeader}"></TextBlock>
-                                    <TextBlock MaxWidth="600"
+                                    <TextBlock MaxWidth="300" FontSize="11"
                                                Style="{StaticResource TextBlockBase}"
                                                Text="{DynamicResource 'Press Enter to add a tag, which is used for grouping servers. By right-clicking on the tags on the homepage, you can filter or pin a specific tag.'}"
                                                TextWrapping="WrapWithOverflow" 
-                                               Opacity="0.5"></TextBlock>
+                                               Opacity="0.75"></TextBlock>
+                                </StackPanel>
+                        </StackPanel>
+                        <Border x:Name="NotePanel" Grid.Column="1" Margin="24 8 0 0" VerticalAlignment="Top"
+                                Background="#EDF3F7" CornerRadius="6" Padding="16">
+                            <StackPanel>
+                                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource TextBlockBase}" FontWeight="SemiBold" Text="备注" Margin="0 0 8 0"></TextBlock>
+
+                                    <!--icon button show note-->
+                                    <Button Name="ButtonShowNote"
+                                            Width="16" Height="16"
+                                            Background="Transparent"
+                                            attachProperty:VisionElement.BackgroundAccent="Transparent"
+                                            attachProperty:VisionElement.BackgroundOnMouseDown="Transparent"
+                                            Foreground="{DynamicResource BackgroundTextBrush}"
+                                            attachProperty:VisionElement.ForegroundAccent="{DynamicResource BackgroundTextBrush}"
+                                            attachProperty:VisionElement.ForegroundOnMouseDown="{DynamicResource BackgroundTextBrush}"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Opacity="0.7"
+                                            ToolTip="{DynamicResource Preview}"
+                                            attachProperty:VisionElement.Opacity="0.8"
+                                            attachProperty:VisionElement.OpacityAccent="0.9"
+                                            MouseEnter="ButtonShowNote_OnMouseEnter"
+                                            Style="{StaticResource ButtonBarPrimaryStyle}"
+                                            Visibility="{Binding Server.Note, Converter={StaticResource ConverterNoteToVisibility}}"
+                                            >
+                                        <Path Data="{StaticResource NoteGeometry}"
+                                              Width="13"
+                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType=Button}}"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType=Button}}"
+                                              StrokeThickness="0" Stretch="Uniform" />
+                                    </Button>
+
+                                    <Popup Name="PopupNote"
+                                           AllowsTransparency="True"
+                                           PlacementTarget="{Binding ElementName=ButtonShowNote}" StaysOpen="False">
+                                        <noteDisplay:NoteDisplayAndEditor x:Name="PopupNoteGrid" Width="400" Height="300"
+                                                                          Server="{Binding Server, Mode=OneWay}"
+                                                                          EditEnable="False"
+                                                                          EditButtonVisibility="Collapsed"
+                                                                          CloseButtonVisibility="Collapsed"/>
+                                    </Popup>
                                 </StackPanel>
 
 
-
+                                <TextBox TextWrapping="Wrap" Width="Auto"
+                                         TextAlignment="Left" Height="148" Margin="0 8 0 0" VerticalScrollBarVisibility="Auto"
+                                         MouseWheel="TextBoxMarkdown_OnMouseWheel"
+                                         VerticalContentAlignment="Top"
+                                         AcceptsReturn="True"
+                                         AcceptsTab="True"
+                                         Tag="备注（支持 Markdown）"
+                                         Text="{Binding Server.Note, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Expander Header="连接脚本（可选）" IsExpanded="False" Margin="144 12 0 4"
+                              Foreground="{DynamicResource BackgroundTextBrush}">
+                        <StackPanel Margin="-144 4 0 8">
                                 <controls:GridWith4Columns>
                                     <TextBlock Style="{StaticResource RowHeader}" Grid.Column="0" Text="{DynamicResource 'Script before connect'}"></TextBlock>
                                     <TextBox Grid.Column="1"
@@ -188,7 +259,7 @@
                                               ToolTip="{DynamicResource 'Hide script window'}">
                                         <TextBlock Text="{DynamicResource 'Hide script window'}"
                                                    TextWrapping="WrapWithOverflow" 
-                                                   Opacity="0.5"></TextBlock>
+                                                   Opacity="0.75"></TextBlock>
                                     </CheckBox>
                                 </StackPanel>
 
@@ -214,7 +285,8 @@
                                                 Content="{DynamicResource Test}"></Button>
                                     </StackPanel>
                                 </controls:GridWith4Columns>
-
+                        </StackPanel>
+                    </Expander>
                                 <controls:GridWith4Columns>
                                     <controls:GridWith4Columns.Style>
                                         <Style TargetType="controls:GridWith4Columns" BasedOn="{StaticResource {x:Type controls:GridWith4Columns}}">
@@ -235,69 +307,8 @@
                                               SelectedItem="{Binding Server.SelectedRunnerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     </ComboBox>
                                 </controls:GridWith4Columns>
-
-                                <!--<ContentControl Content="{Binding ProtocolEditControl}"></ContentControl>-->
-                                <ContentControl s:View.Model="{Binding EditorViewModel}"></ContentControl>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-
-
-                    <controls:GridWith4Columns VerticalAlignment="Top" MinHeight="60">
-                        <Grid Margin="40 32" Grid.Column="2" Grid.ColumnSpan="2">
-                            <StackPanel>
-                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                    <TextBlock Style="{StaticResource RowHeader}" Text="{DynamicResource Note}" TextAlignment="Center"></TextBlock>
-
-                                    <!--icon button show note-->
-                                    <Button Name="ButtonShowNote"
-                                            Width="16" Height="16"
-                                            Background="Transparent"
-                                            attachProperty:VisionElement.BackgroundAccent="Transparent"
-                                            attachProperty:VisionElement.BackgroundOnMouseDown="Transparent"
-                                            Foreground="{DynamicResource BackgroundTextBrush}"
-                                            attachProperty:VisionElement.ForegroundAccent="{DynamicResource BackgroundTextBrush}"
-                                            attachProperty:VisionElement.ForegroundOnMouseDown="{DynamicResource BackgroundTextBrush}"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Opacity="0.7"
-                                            ToolTip="{DynamicResource Preview}"
-                                            attachProperty:VisionElement.Opacity="0.8"
-                                            attachProperty:VisionElement.OpacityAccent="0.9"
-                                            MouseEnter="ButtonShowNote_OnMouseEnter"
-                                            Style="{StaticResource ButtonBarPrimaryStyle}"
-                                            Visibility="{Binding Server.Note, Converter={StaticResource ConverterNoteToVisibility}}"
-                                            >
-                                        <Path Data="{StaticResource NoteGeometry}"
-                                              Width="13"
-                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType=Button}}"
-                                              Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType=Button}}"
-                                              StrokeThickness="0" Stretch="Uniform" />
-                                    </Button>
-
-                                    <Popup Name="PopupNote" 
-                                           AllowsTransparency="True"
-                                           PlacementTarget="{Binding ElementName=ButtonShowNote}" StaysOpen="False">
-                                        <noteDisplay:NoteDisplayAndEditor x:Name="PopupNoteGrid" Width="400" Height="300"
-                                                                          Server="{Binding Server, Mode=OneWay}"
-                                                                          EditEnable="False"
-                                                                          EditButtonVisibility="Collapsed"
-                                                                          CloseButtonVisibility="Collapsed"/>
-                                    </Popup>
-                                </StackPanel>
-
-
-                                <TextBox TextWrapping="Wrap" Width="Auto"
-                                         TextAlignment="Left" Height="150" Margin="0 5"
-                                         MouseWheel="TextBoxMarkdown_OnMouseWheel"
-                                         VerticalContentAlignment="Top"
-                                         AcceptsReturn="True"
-                                         AcceptsTab="True"
-                                         Tag="&#13;# Markdown support&#13;&#13;- write your note here&#13;- foo&#13;&#13;![pic](http://x/structure.png)&#13;&#13;[link](http://x/readme.md)" xml:space="preserve"
-                                         Text="{Binding Server.Note, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                            </StackPanel>
-                        </Grid>
-                    </controls:GridWith4Columns>
-                </Grid>
+                    <ContentControl s:View.Model="{Binding EditorViewModel}"/>
+                </StackPanel>
             </ScrollViewer>
         </Grid>
 
@@ -355,9 +366,6 @@
 
         <Grid VerticalAlignment="Top">
             <Border BorderThickness="0 0 0 1" BorderBrush="{DynamicResource AccentMidBrush}" Background="{DynamicResource PrimaryTextBrush}" Height="{StaticResource TopHeight}">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="3" Direction="270"  Opacity="0.6" Color="Black"></DropShadowEffect>
-                </Border.Effect>
             </Border>
 
             <Border BorderThickness="0 0 0 2" BorderBrush="{DynamicResource AccentMidBrush}" Background="{DynamicResource PrimaryMidBrush}">
@@ -402,7 +410,7 @@
                                      IsSynchronizedWithCurrentItem="True"
                                      ItemsSource="{Binding ProtocolList}"
                                      SelectedValue="{Binding SelectedProtocol}"
-                                     Background="{StaticResource PrimaryMidBrush}"
+                                     Background="{DynamicResource PrimaryMidBrush}"
                                      Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType=ScrollViewer}, Path=Height}"
                                      ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                      ScrollViewer.HorizontalScrollBarVisibility="Hidden"
@@ -423,7 +431,9 @@
                                 <ListBox.Resources>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"></Setter>
+                                        <Setter Property="MinHeight" Value="32"/>
+                                        <Setter Property="FontSize" Value="13"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"></Setter>
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
@@ -469,7 +479,7 @@
 
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Margin="15 0">
+                                        <StackPanel Orientation="Horizontal" Margin="14 5">
                                             <TextBlock Style="{StaticResource TextBlockBase}"
                                                        Foreground="{Binding Path=Foreground,RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
                                                        FontWeight="{Binding Path=FontWeight,RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
@@ -504,9 +514,6 @@
 
         <Grid VerticalAlignment="Bottom">
             <Border BorderThickness="0 0 0 1" BorderBrush="{DynamicResource AccentMidBrush}" Background="{DynamicResource PrimaryTextBrush}" Height="{StaticResource BottomHeight}">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="3" Direction="90"  Opacity="0.6" Color="Black"></DropShadowEffect>
-                </Border.Effect>
             </Border>
 
             <Border BorderThickness="0 2 0 0" BorderBrush="{DynamicResource AccentMidBrush}" Background="{DynamicResource PrimaryMidBrush}">

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using _1RM.Resources.Icons;
@@ -35,6 +36,17 @@ namespace _1RM.View.Editor
         private void TextBoxMarkdown_OnMouseWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
+        }
+
+        private void OverviewGrid_OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // Use a second row when the window cannot comfortably fit both panels.
+            bool wide = e.NewSize.Width >= 880;
+            OverviewFieldsColumn.Width = wide ? new GridLength(500) : new GridLength(1, GridUnitType.Star);
+            OverviewNoteColumn.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+            Grid.SetColumn(NotePanel, wide ? 1 : 0);
+            Grid.SetRow(NotePanel, wide ? 0 : 1);
+            NotePanel.Margin = wide ? new Thickness(24, 8, 0, 0) : new Thickness(144, 12, 0, 0);
         }
 
         private void ButtonShowNote_OnMouseEnter(object sender, MouseEventArgs e)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -16,6 +16,21 @@ namespace _1RM.View
 {
     public partial class MainWindowView : WindowChromeBase
     {
+        public static readonly DependencyProperty PreviewColumnCountProperty = DependencyProperty.Register(
+            nameof(PreviewColumnCount), typeof(int), typeof(MainWindowView), new PropertyMetadata(4));
+
+        public int PreviewColumnCount
+        {
+            get => (int)GetValue(PreviewColumnCountProperty);
+            set => SetValue(PreviewColumnCountProperty, value);
+        }
+
+        private void PreviewColumns_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.RadioButton button && int.TryParse(button.Tag?.ToString(), out var columns))
+                PreviewColumnCount = columns;
+        }
+
         public MainWindowViewModel Vm { get; }
         private readonly ConfigurationService _configurationService;
 

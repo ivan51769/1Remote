@@ -1,4 +1,4 @@
-﻿using _1RM.Model;
+using _1RM.Model;
 using _1RM.Model.Protocol;
 using _1RM.Service.Locality;
 using _1RM.Utils;
@@ -929,7 +929,7 @@ namespace _1RM.View.Host.ProtocolHosts
             {
                 // Use synchronous disposal to ensure the RDP client is fully disposed before continuing
                 // This prevents race conditions where the client might be accessed or disposed multiple times
-                Execute.OnUIThreadSync(DisposeRdpClient);
+                Execute.OnUIThreadSync(() => { StopDesktopPreview(true); DisposeRdpClient(); });
             }
             catch (Exception e)
             {
