@@ -33,6 +33,16 @@ dotnet publish Ui/Ui.csproj -c Release -r win-x64 --self-contained true `
 
 此脚本仅在本地提取构建兼容值，写入被 Git 忽略的 `Ui/CompatibilitySalt.private`，然后嵌入本地 EXE。兼容值、数据库、用户配置、真实截图以及带兼容值的构建产物均不属于本分支的公开交付内容。公开源码不会读取或上传用户数据库。
 
+## 公开发布包
+
+```powershell
+./Build-PublicPreview.ps1
+```
+
+公开构建禁用本地兼容值资源和本地密钥注入步骤，并移除调试符号与 XAML 调试信息。发布时只打包 EXE、许可证、便携模式标记及说明，不包含数据库、配置或截图。
+
+公开版应解压到新的独立目录。它不会兼容官方版或本地定制版已有的加密数据库；请重新添加连接，或在本地自行构建兼容版本。不要用公开版覆盖现有安装目录。`v*-preview.*` 标签不触发上游正式版发布流程。
+
 ## 验证
 
 ```powershell

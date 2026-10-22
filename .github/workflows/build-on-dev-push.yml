@@ -7,6 +7,8 @@ on:
       - "*main*"
     tags:
       - "*"
+      # Preview releases use a separate sanitized public build.
+      - "!v*-preview.*"
 jobs:
   JobBuild:
     permissions:

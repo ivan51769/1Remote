@@ -9,7 +9,11 @@ namespace _1RM
         public const uint Patch = 1;
         public const uint Build = 0;
         public const string BuildDate = "";
+#if PUBLIC_PREVIEW_RELEASE
+        public const string PreRelease = "preview.1";
+#else
         public const string PreRelease = ""; // e.g. "alpha" "beta.2"
+#endif
 
         public static readonly Version VersionData = new Version(Major, Minor, Patch, Build, PreRelease);
         public static string Version => VersionData.ToString();

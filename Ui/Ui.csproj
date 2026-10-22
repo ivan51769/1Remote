@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <EmbeddedResource Include="CompatibilitySalt.private" LogicalName="1Remote.CompatibilitySalt" Condition="Exists('CompatibilitySalt.private')" />
+        <EmbeddedResource Include="CompatibilitySalt.private" LogicalName="1Remote.CompatibilitySalt" Condition="Exists('CompatibilitySalt.private') and '$(PublicPreviewRelease)' != 'true'" />
     </ItemGroup>
+    <PropertyGroup Condition="'$(PublicPreviewRelease)' == 'true'">
+        <DefineConstants>$(DefineConstants);PUBLIC_PREVIEW_RELEASE</DefineConstants>
+    </PropertyGroup>
     <PropertyGroup>
         <OutputType Condition="'$(Configuration)'=='Debug'">Exe</OutputType>
         <OutputType Condition="'$(Configuration)'=='StoreDebug'">Exe</OutputType>
@@ -526,11 +529,11 @@
         </Page>
     </ItemGroup>
 
-    <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)'!='Debug'">
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)'!='Debug' and '$(PublicPreviewRelease)' != 'true'">
         <Exec Command="powershell.exe ..\scripts\Set-Secret.ps1 -filePath .\Ui\Assert.cs -Pattern &quot;===REPLACE_ME_WITH_APP_CENTER_SECRET===&quot; -localSecretFilePath &quot;C:\1Remote_Secret\APP_CENTER_SECRET_1REMOTE.txt&quot;&#xD;&#xA;powershell.exe ..\scripts\Set-Secret.ps1 -filePath .\Ui\Assert.cs -Pattern &quot;===REPLACE_ME_WITH_SENTRY_IO_DEN===&quot; -localSecretFilePath &quot;C:\1Remote_Secret\SENTRY_IO_DEN.txt&quot;&#xD;&#xA;powershell.exe ..\scripts\Set-Secret.ps1 -filePath .\Ui\Assert.cs -Pattern &quot;===REPLACE_ME_WITH_SALT===&quot; -localSecretFilePath &quot;C:\1Remote_Secret\Salt.txt&quot;&#xD;&#xA;powershell.exe ..\scripts\Set-BuildDate.ps1 -filePath .\Ui\AppVersion.cs&#xD;&#xA;powershell.exe ..\scripts\Set-AssemblyVersion.ps1" />
     </Target>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'!='Debug'">
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'!='Debug' and '$(PublicPreviewRelease)' != 'true'">
         <Exec Command="powershell.exe ..\scripts\Set-Secret.ps1 -filePath .\Ui\Assert.cs -Pattern &quot;===REPLACE_ME_WITH_APP_CENTER_SECRET===&quot; -localSecretFilePath &quot;C:\1Remote_Secret\APP_CENTER_SECRET_1REMOTE.txt&quot; -isRevert&#xD;&#xA;powershell.exe ..\scripts\Set-Secret.ps1 -filePath .\Ui\Assert.cs -Pattern &quot;===REPLACE_ME_WITH_SENTRY_IO_DEN===&quot; -localSecretFilePath &quot;C:\1Remote_Secret\SENTRY_IO_DEN.txt&quot; -isRevert&#xD;&#xA;powershell.exe ..\scripts\Set-Secret.ps1 -filePath .\Ui\Assert.cs -Pattern &quot;===REPLACE_ME_WITH_SALT===&quot; -localSecretFilePath &quot;C:\1Remote_Secret\Salt.txt&quot; -isRevert&#xD;&#xA;powershell.exe ..\scripts\Set-BuildDate.ps1 -filePath .\Ui\AppVersion.cs -isRevert" />
     </Target>
 </Project>
