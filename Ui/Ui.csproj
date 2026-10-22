@@ -6,6 +6,12 @@
     <PropertyGroup Condition="'$(PublicPreviewRelease)' == 'true'">
         <DefineConstants>$(DefineConstants);PUBLIC_PREVIEW_RELEASE</DefineConstants>
     </PropertyGroup>
+    <!-- Sentry 4.x otherwise embeds the absolute build directory in assembly metadata. -->
+    <Target Name="RemovePublicPreviewBuildPath" AfterTargets="WriteSentryAttributes" BeforeTargets="CoreCompile" Condition="'$(PublicPreviewRelease)' == 'true'">
+        <ItemGroup>
+            <Compile Remove="$(IntermediateOutputPath)Sentry.Attributes.cs" />
+        </ItemGroup>
+    </Target>
     <PropertyGroup>
         <OutputType Condition="'$(Configuration)'=='Debug'">Exe</OutputType>
         <OutputType Condition="'$(Configuration)'=='StoreDebug'">Exe</OutputType>
