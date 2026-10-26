@@ -351,4 +351,5 @@ healthchecksdb
 1Remote.db*
 1Remote.json
 DesktopPreviews/
+DeviceAliases/
 1Remote.previous-*.exe

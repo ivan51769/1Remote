@@ -83,19 +83,20 @@
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
 
-            <Grid Background="Transparent" Name="WinTitleBar">
-                <StackPanel Orientation="Horizontal">
-                    <Grid Background="Transparent" Width="24" Height="24" Margin="5">
+            <Grid Grid.Row="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Grid Background="Transparent" Name="WinTitleBar" ClipToBounds="True">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Left" Background="Transparent" Width="24" Height="24" Margin="5">
                         <Image Source="/Resources/Image/Logo/logo32.png"></Image>
                     </Grid>
-                    <TextBlock VerticalAlignment="Center" 
+                    <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                Style="{StaticResource TextBlockBase}"
                                Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding Title, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}" />
-                </StackPanel>
+                </DockPanel>
             </Grid>
 
             <!-- System Button Area -->
-            <StackPanel Grid.Row="0"
+            <StackPanel Grid.Column="1"
                         Orientation="Horizontal" HorizontalAlignment="Right">
                 <Grid Height="35" VerticalAlignment="Top" Margin="0 0 4 0">
                     <TextBox Width="150" Height="25" FontSize="12"
@@ -149,6 +150,40 @@
                     </TextBox>
                 </Grid>
 
+                <Button x:Name="AccountTableButton" Content="账号表" Width="60" Height="26" Margin="6,4,0,0" VerticalAlignment="Top"
+                        FontSize="12" Padding="6,2" Foreground="#34516A" Background="#DFEAF3" BorderBrush="#CAD8E5"
+                        IsEnabled="{Binding IsShownList}" Click="AccountTable_Click" ToolTip="表格管理账号、复制新增连接"/>
+                <CheckBox x:Name="PrivacyModeToggle" Content="隐私模式" Width="76" Height="26"
+                          Margin="8 4 0 0" VerticalAlignment="Top" FontSize="12" Cursor="Hand"
+                          Checked="PrivacyMode_Changed" Unchecked="PrivacyMode_Changed"
+                          ToolTip="隐藏备注名，设备名称简化为 Server-amz01 / Server-admin；不隐藏截图">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border x:Name="PrivacySurface" Background="#DFEAF3" CornerRadius="4" Padding="5,2">
+                                <TextBlock x:Name="PrivacyLabel" Text="隐私模式" Foreground="#34516A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="PrivacySurface" Property="Background" Value="{DynamicResource AccentMidBrush}"/>
+                                    <Setter TargetName="PrivacyLabel" Property="Foreground" Value="White"/>
+                                    <Setter TargetName="PrivacyLabel" Property="Text" Value="隐私·开"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
+                </CheckBox>
+                <CheckBox x:Name="EnhancedModeToggle" Content="增强模式" Width="76" Height="26" Margin="6,4,0,0"
+                          VerticalAlignment="Top" FontSize="12" Cursor="Hand" Checked="EnhancedMode_Changed" Unchecked="EnhancedMode_Changed"
+                          ToolTip="在卡片上显示 IP / 主机名和端口">
+                    <CheckBox.Template><ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="EnhancedSurface" Background="#DFEAF3" CornerRadius="4" Padding="5,2">
+                            <TextBlock x:Name="EnhancedLabel" Text="增强模式" Foreground="#34516A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border><ControlTemplate.Triggers><Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="EnhancedSurface" Property="Background" Value="{DynamicResource AccentMidBrush}"/>
+                            <Setter TargetName="EnhancedLabel" Property="Foreground" Value="White"/>
+                        </Trigger></ControlTemplate.Triggers>
+                    </ControlTemplate></CheckBox.Template>
+                </CheckBox>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8 4 4 0">
                     <RadioButton Content="4" Tag="4" GroupName="PreviewColumns" IsChecked="True"
                                  Style="{StaticResource PreviewColumnsButton}" Checked="PreviewColumns_Checked" ToolTip="每行 4 台"/>
@@ -569,8 +604,7 @@
                     </Path>
                 </Button>
             </StackPanel>
-
-
+            </Grid>
             <!-- Paging Area -->
             <Grid Grid.Row="1">
                 <Grid.Style>

@@ -77,6 +77,7 @@ namespace _1RM.Service.Locality
             _settings.ConnectRecodes.AddOrUpdate(vmServer.Id, time, (s, l) => time);
             Save();
             vmServer.LastConnectTime = ConnectTimeGet(vmServer.Server);
+            TaskbarJumpListService.RecordConnection(vmServer.Server);
         }
 
         public static DateTime ConnectTimeGet(ProtocolBase server)

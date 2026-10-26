@@ -39,7 +39,12 @@ internal static class DesktopDeviceActions
     {
         var menu = new ContextMenu();
         void Add(string title, Action action) { var item = new MenuItem { Header = title, FontSize = 12 }; item.Click += (_, _) => action(); menu.Items.Add(item); }
+        var aliasItem = new MenuItem { Header = "编辑备注名", FontSize = 12, IsEnabled = !DeviceAliasSettings.Current.PrivacyMode,
+            ToolTip = "备注仅保存在本机；编辑前请关闭隐私模式" };
+        aliasItem.Click += (_, _) => EditAlias(vm, owner);
+        menu.Items.Add(aliasItem);
         Add("连接设置", () => vm.CmdEditServer.Execute(null));
+        Add("复制副本", () => GlobalEventHelper.OnRequestGoToServerDuplicatePage?.Invoke(vm.Server, false));
         menu.Items.Add(new Separator());
         Add("重启远程电脑…", () => ConfirmPower(vm, "restart", owner, report));
         Add("关闭远程电脑…", () => ConfirmPower(vm, "shutdown", owner, report));
@@ -50,6 +55,33 @@ internal static class DesktopDeviceActions
         Add(enabled ? "关闭此设备的预览保存" : "开启此设备的预览保存", () =>
         { try { DesktopPreviewStore.SetEnabled(vm.Server, !enabled); refresh(); } catch (Exception ex) { report(ex.Message); } });
         menu.PlacementTarget = anchor; menu.IsOpen = true;
+    }
+    private static void EditAlias(ProtocolBaseViewModel vm, Window owner)
+    {
+        if (DeviceAliasSettings.Current.PrivacyMode) return;
+        var key = DesktopPreviewStore.Key(vm.Server);
+        var editor = new TextBox { Text = DeviceAliasSettings.Current.GetAlias(key, vm.DisplayName), MaxLength = 64,
+            Height = 32, Margin = new Thickness(0, 10, 0, 8), Background = System.Windows.Media.Brushes.White,
+            Foreground = System.Windows.Media.Brushes.Black, FontSize = 14 };
+        var body = new StackPanel { Margin = new Thickness(20) };
+        var window = new Window { Title = "编辑备注名", Owner = owner, Width = 420, SizeToContent = SizeToContent.Height,
+            ResizeMode = ResizeMode.NoResize, WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = System.Windows.Media.Brushes.White, Foreground = System.Windows.Media.Brushes.Black,
+            FontFamily = new System.Windows.Media.FontFamily("Microsoft YaHei UI"), Content = body };
+        body.Children.Add(new TextBlock { Text = vm.DisplayName, TextWrapping = TextWrapping.Wrap, Foreground = System.Windows.Media.Brushes.Black });
+        body.Children.Add(editor);
+        body.Children.Add(new TextBlock { Text = "留空可清除备注。备注只保存在本机，隐私模式下隐藏。", TextWrapping = TextWrapping.Wrap, FontSize = 11, Foreground = System.Windows.Media.Brushes.DimGray });
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 16, 0, 0) };
+        var save = new Button { Content = "保存", IsDefault = true, MinWidth = 70, Margin = new Thickness(0, 0, 8, 0) };
+        var cancel = new Button { Content = "取消", IsCancel = true, MinWidth = 70 };
+        save.Click += (_, _) =>
+        {
+            try { DeviceAliasSettings.Current.SetAlias(key, vm.DisplayName, editor.Text); window.DialogResult = true; }
+            catch (Exception) { MessageBox.Show(window, "备注保存失败，请检查本地配置目录是否可写。", "1Remote Preview", MessageBoxButton.OK, MessageBoxImage.Warning); }
+        };
+        buttons.Children.Add(save); buttons.Children.Add(cancel); body.Children.Add(buttons);
+        window.Loaded += (_, _) => { editor.Focus(); editor.SelectAll(); };
+        window.ShowDialog();
     }
     public static async void ConfirmPower(ProtocolBaseViewModel vm, string action, Window owner, Action<string> report)
     {

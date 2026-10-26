@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,7 +97,7 @@ namespace _1RM.Service
             {
                 SimpleLogHelper.Fatal(t.Exception!);
                 Execute.OnUIThread(() =>
-                    MessageBoxHelper.ErrorAlert($"Connect failed: {t.Exception!.GetBaseException().Message}"));
+                    MessageBoxHelper.ErrorAlert($"未能打开远程桌面。\n{t.Exception!.GetBaseException().Message}\n\n请重试；如果仍然失败，可在日志中查看详细原因。"));
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
@@ -120,7 +120,7 @@ namespace _1RM.Service
             {
                 SimpleLogHelper.Fatal(t.Exception!);
                 Execute.OnUIThread(() =>
-                    MessageBoxHelper.ErrorAlert($"Connect failed: {t.Exception!.GetBaseException().Message}"));
+                    MessageBoxHelper.ErrorAlert($"未能打开远程桌面。\n{t.Exception!.GetBaseException().Message}\n\n请重试；如果仍然失败，可在日志中查看详细原因。"));
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
@@ -131,66 +131,54 @@ namespace _1RM.Service
         }
 
 
+        public bool TryActivateExistingSession(ProtocolBase server)
+        {
+            if (server.IsTmpSession() || !server.IsOnlyOneInstance()) return false;
+            var host = _connectionId2Hosts.Values.FirstOrDefault(x =>
+                x.ProtocolServer.Id == server.Id &&
+                x.ProtocolServer.DataSource?.DataSourceName == server.DataSource?.DataSourceName &&
+                x.Status != ProtocolHostStatus.Disconnected);
+            return host != null && ActivateExistingHost(host, false);
+        }
+
         private bool ActivateOrReConnIfServerSessionIsOpened(in ProtocolBase server)
         {
             if (!server.IsOnlyOneInstance()) return false;
-            var connectionId = server.BuildConnectionId();
-            // if is `OnlyOneInstance Protocol`, and it is connected, activate it and return.
-            if (!_connectionId2Hosts.ContainsKey(connectionId))
-                return false;
-
-            SimpleLogHelper.Debug($"_connectionId2Hosts ContainsKey {connectionId}");
-            // Find activate
-            if (_connectionId2Hosts[connectionId].ParentWindow is { } win)
-            {
-                if (win is TabWindowView tab)
-                {
-                    var serverId = server.Id;
-                    var s = tab.GetViewModel().Items.FirstOrDefault(x => x.Content?.ProtocolServer?.BuildConnectionId() == connectionId);
-                    if (s != null)
-                        tab.GetViewModel().SelectedItem = s;
-                }
-
-                if (win.IsClosed)
-                {
-                    MarkProtocolHostToClose(new string[] { connectionId });
-                    CleanupProtocolsAndWindows();
-                    return false;
-                }
-
-                try
-                {
-                    Execute.OnUIThreadSync(() =>
-                    {
-                        if (win.IsClosing != false) return;
-                        win.WindowState = win.WindowState == WindowState.Minimized ? WindowState.Normal : win.WindowState;
-                        win.Show();
-                        win.ShowInTaskbar = true;
-                        win.Activate();
-                    });
-
-                    var vmServer = _appData.GetItemById(server.DataSource?.DataSourceName ?? "", server.Id);
-                    vmServer?.ConnectTimeAddOrUpdate();
-                }
-                catch (Exception e)
-                {
-                    SimpleLogHelper.Error(e);
-                    MarkProtocolHostToClose(new string[] { connectionId });
-                    CleanupProtocolsAndWindows();
-                }
-            }
-
-            // Reconnect
-            if (_connectionId2Hosts[connectionId].ParentWindow != null)
-            {
-                if (_connectionId2Hosts[connectionId].Status != ProtocolHostStatus.Connected)
-                    _connectionId2Hosts[connectionId].ReConn();
-            }
-            return true;
+            return _connectionId2Hosts.TryGetValue(server.BuildConnectionId(), out var host)
+                && ActivateExistingHost(host, true);
         }
 
-
-
+        private bool ActivateExistingHost(HostBase host, bool reconnect)
+        {
+            // All WPF reads and mutations, including tab selection and reconnection,
+            // must run on the host's dispatcher, not the background connect task.
+            bool stale = false;
+            bool activated = SessionUiDispatcher.Invoke(host, () =>
+            {
+                var win = host.ParentWindow;
+                if (win == null) return host.Status != ProtocolHostStatus.Disconnected;
+                if (win.IsClosed || win.IsClosing) { stale = true; return false; }
+                if (win is TabWindowView tab)
+                {
+                    var item = tab.GetViewModel().Items.FirstOrDefault(x => ReferenceEquals(x.Content, host));
+                    if (item != null) tab.GetViewModel().SelectedItem = item;
+                }
+                if (win.WindowState == WindowState.Minimized) win.WindowState = WindowState.Normal;
+                win.Show();
+                win.ShowInTaskbar = true;
+                win.Activate();
+                host.FocusOnMe();
+                // A connection already in progress must not be restarted by another click.
+                if (reconnect && host.Status == ProtocolHostStatus.Disconnected) host.ReConn();
+                return true;
+            });
+            if (stale)
+            {
+                MarkProtocolHostToClose(new[] { host.ConnectionId });
+                CleanupProtocolsAndWindows();
+            }
+            return activated;
+        }
 
         #region CloseProtocol
 

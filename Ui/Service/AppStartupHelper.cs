@@ -140,6 +140,13 @@ namespace _1RM.Service
 
         private static void ProcessArg(HashSet<string> args)
         {
+            // Named-pipe activation arrives on a worker thread; resolve and dispatch on the UI thread.
+            if (!System.Windows.Application.Current.Dispatcher.CheckAccess())
+            {
+                var pending = new HashSet<string>(args);
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() => ProcessArg(pending));
+                return;
+            }
             Debug.Assert(IoC.TryGet<MainWindowViewModel>() != null);
 
             ProcessCfgArgs(ref args);
@@ -157,7 +164,21 @@ namespace _1RM.Service
                 var servers = new List<ProtocolBase>();
                 foreach (var arg in args)
                 {
-                    if (arg.StartsWith(TAG_PREFIX))
+                    if (arg.StartsWith(TaskbarJumpListService.ArgumentPrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var server = TaskbarJumpListService.Resolve(arg, IoC.Get<GlobalData>().VmItemList.Select(x => x.Server));
+                        if (server != null)
+                        {
+                            if (!servers.Contains(server)) servers.Add(server);
+                        }
+                        else
+                        {
+                            IoC.Get<MainWindowViewModel>().ShowMe(true);
+                            System.Windows.MessageBox.Show("此设备已删除或数据源暂不可用。请在设备列表中检查，或从任务栏右键列表取消固定此项。",
+                                Assert.APP_DISPLAY_NAME, System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                        }
+                    }
+                    else if (arg.StartsWith(TAG_PREFIX))
                     {
                         SimpleLogHelper.Debug("ProcessArg: " + arg);
                         // tag connect

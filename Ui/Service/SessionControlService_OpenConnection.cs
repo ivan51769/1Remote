@@ -188,6 +188,13 @@ namespace _1RM.Service
 
         private async Task<string> Connect(ProtocolBase protocol, string fromView, string assignTabToken = "", string assignRunnerName = "", string assignCredentialName = "")
         {
+            // Reuse the live desktop before asking for credentials or running scripts.
+            if (string.IsNullOrEmpty(assignRunnerName) && string.IsNullOrEmpty(assignCredentialName)
+                && TryActivateExistingSession(protocol))
+            {
+                _appData.GetItemById(protocol.DataSource?.DataSourceName ?? "", protocol.Id)?.ConnectTimeAddOrUpdate();
+                return "";
+            }
 
             #region prepare
 

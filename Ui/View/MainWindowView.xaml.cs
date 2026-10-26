@@ -33,11 +33,46 @@ namespace _1RM.View
 
         public MainWindowViewModel Vm { get; }
         private readonly ConfigurationService _configurationService;
+        private bool _privacyReady;
+
+        private void AccountTable_Click(object sender, RoutedEventArgs e)
+        {
+            new AccountTableWindow { Owner = this }.ShowDialog();
+        }
+
+        private void EnhancedMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_privacyReady) return;
+            try { DeviceAliasSettings.Current.EnhancedMode = EnhancedModeToggle.IsChecked == true; }
+            catch (Exception)
+            {
+                _privacyReady = false;
+                EnhancedModeToggle.IsChecked = DeviceAliasSettings.Current.EnhancedMode;
+                _privacyReady = true;
+                MessageBox.Show(this, "无法保存显示设置，请检查本地配置目录是否可写。", "1Remote Preview", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void PrivacyMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_privacyReady) return;
+            try { DeviceAliasSettings.Current.PrivacyMode = PrivacyModeToggle.IsChecked == true; }
+            catch (Exception)
+            {
+                _privacyReady = false;
+                PrivacyModeToggle.IsChecked = DeviceAliasSettings.Current.PrivacyMode;
+                _privacyReady = true;
+                MessageBox.Show(this, "无法保存隐私设置，请检查本地配置目录是否可写。", "1Remote Preview", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
 
 
         public MainWindowView(MainWindowViewModel vm, LocalityService localityService, ConfigurationService configurationService)
         {
             InitializeComponent();
+            PrivacyModeToggle.IsChecked = DeviceAliasSettings.Current.PrivacyMode;
+            EnhancedModeToggle.IsChecked = DeviceAliasSettings.Current.EnhancedMode;
+            _privacyReady = true;
             Vm = vm;
             _configurationService = configurationService;
             this.DataContext = Vm;

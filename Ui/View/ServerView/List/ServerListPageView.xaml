@@ -459,6 +459,7 @@
                 </Grid>
 
                 <ListBox Name="LvServerCards"
+                         PreviewKeyDown="ServerCards_PreviewKeyDown"
                          HorizontalContentAlignment="Stretch"
                          SelectedItem="{Binding SelectedServerViewModel}"
                          ItemsSource="{Binding Source={StaticResource ServerListItemSource}}"

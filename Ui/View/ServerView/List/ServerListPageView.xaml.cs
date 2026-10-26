@@ -1,4 +1,4 @@
-﻿using _1RM.Controls.NoteDisplay;
+using _1RM.Controls.NoteDisplay;
 using _1RM.Model;
 using _1RM.Service.DataSource;
 using _1RM.Service.DataSource.Model;
@@ -144,53 +144,33 @@ namespace _1RM.View.ServerView
             });
         }
 
-        private ProtocolBaseViewModel? _shiftSelectStartItem = null;
+        private readonly _1RM.Service.DesktopCardSelection _cardSelection = new();
         private void ServerList_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 1 && sender is DependencyObject obj)
+            if (e.ChangedButton != MouseButton.Left || e.ClickCount != 1 || sender is not DependencyObject obj) return;
+            if (MyVisualTreeHelper.VisualUpwardSearch<ListBoxItem>(obj) is not { DataContext: ProtocolBaseViewModel vm } item) return;
+            if (e.OriginalSource is DependencyObject source &&
+                MyVisualTreeHelper.VisualUpwardSearch<System.Windows.Controls.Primitives.ButtonBase>(source) != null)
             {
-                // shift or ctrl + mouse button down to select item
-                if (MyVisualTreeHelper.VisualUpwardSearch<ListBoxItem>(obj) is { DataContext: ProtocolBaseViewModel vm } listBoxItem)
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
-                    {
-                        vm.IsSelected = !vm.IsSelected;
-                        // 阻止 GroupItem 中 expander header 中的移动按钮响应 expander header 点击展开/隐藏事件
-                    }
-                    else if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                    {
-                        if (_shiftSelectStartItem != null)
-                        {
-                            // shift select from _shiftSelectStartItem to listBoxItem
-                            var items = LvServerCards.Items.Cast<ProtocolBaseViewModel>().ToList();
-                            int startIdx = items.IndexOf(_shiftSelectStartItem);
-                            int endIdx = items.IndexOf(vm);
-                            if (startIdx < 0 || endIdx < 0)
-                            {
-                                _shiftSelectStartItem = null;
-                            }
-                            if (startIdx > endIdx)
-                                (startIdx, endIdx) = (endIdx, startIdx);
-                            for (int i = 0; i < items.Count; i++)
-                            {
-                                if (i >= startIdx && i <= endIdx)
-                                {
-                                    items[i].IsSelected = true;
-                                }
-                                else
-                                {
-                                    items[i].IsSelected = false;
-                                }
-                            }
-                            e.Handled = true;
-                        }
-                    }
-                    else
-                    {
-                        _shiftSelectStartItem = vm;
-                    }
-                }
+                // Checkbox owns its toggle; action buttons must not alter selection.
+                if (MyVisualTreeHelper.VisualUpwardSearch<CheckBox>(source) != null)
+                    _cardSelection.Select(LvServerCards.Items.OfType<ProtocolBaseViewModel>().ToArray(), vm, ModifierKeys.None);
+                return;
             }
+            item.Focus();
+            _cardSelection.Select(LvServerCards.Items.OfType<ProtocolBaseViewModel>().ToArray(), vm, Keyboard.Modifiers);
+        }
+
+        private void ServerCards_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter || Keyboard.Modifiers != ModifierKeys.None) return;
+            if (e.OriginalSource is DependencyObject source &&
+                (MyVisualTreeHelper.VisualUpwardSearch<System.Windows.Controls.Primitives.TextBoxBase>(source) != null ||
+                 MyVisualTreeHelper.VisualUpwardSearch<Button>(source) != null)) return;
+            e.Handled = _1RM.Service.DesktopCardSelection.OpenSelected(
+                LvServerCards.Items.OfType<ProtocolBaseViewModel>(), e.IsRepeat,
+                selected => GlobalEventHelper.OnRequestServersConnect?.Invoke(
+                    selected.Select(x => x.Server).ToArray(), nameof(MainWindowView)));
         }
         private void ServerListExpanderIcon_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -208,7 +188,7 @@ namespace _1RM.View.ServerView
         private void ServerList_PreviewMouseMoveEvent(object sender, MouseEventArgs e)
         {
             //SimpleLogHelper.Debug($"{e.LeftButton} + {sender is Grid}");
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && !_1RM.Service.DesktopCardSelection.IsSelectionGesture(Keyboard.Modifiers))
             {
                 try
                 {

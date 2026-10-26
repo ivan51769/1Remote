@@ -185,6 +185,7 @@ namespace _1RM.Model
 
                 if (isAnySuccess)
                 {
+                    TaskbarJumpListService.Refresh();
                     if (needReload)
                     {
                         ReloadAll(); // UpdateServers & needReload

@@ -339,6 +339,7 @@ namespace _1RM
         public static void InitOnLaunch()
         {
             IoC.Get<GlobalData>().ReloadAll(true);
+            TaskbarJumpListService.Initialize();
             if (ConfigurationServiceObj?.General.ShowRecentlySessionInTray != false)
                 IoC.Get<TaskTrayService>().ReloadTaskTrayContextMenu();
             if (_isNewUser == false && ConfigurationServiceObj != null)

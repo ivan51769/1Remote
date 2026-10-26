@@ -14,25 +14,49 @@
    </ControlTemplate></Setter.Value></Setter>
   </Style>
  </UserControl.Resources>
- <Border Background="#FAFCFE" BorderBrush="#CAD8E5" BorderThickness="1" CornerRadius="7" ClipToBounds="True">
+ <Grid>
+ <Border x:Name="CardSurface" BorderThickness="2" CornerRadius="7" ClipToBounds="True">
+  <Border.Style><Style TargetType="Border">
+   <Setter Property="Background" Value="#FAFCFE"/><Setter Property="BorderBrush" Value="#CAD8E5"/>
+   <Style.Triggers><DataTrigger Binding="{Binding ProtocolBaseViewModel.IsSelected, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+    <Setter Property="BorderBrush" Value="#258BFF"/><Setter Property="Background" Value="#E7F2FF"/>
+   </DataTrigger></Style.Triggers>
+  </Style></Border.Style>
   <StackPanel>
-   <Grid Margin="10,8,10,7"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-    <TextBlock x:Name="DeviceName" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-    <TextBlock x:Name="StateDot" Grid.Column="1" Text="●" FontSize="10" Margin="6,0,0,0" Foreground="#9DAEBD" ToolTip="未连接"/>
+   <Grid Margin="8,8,8,7"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <CheckBox x:Name="SelectionBox" Margin="0,0,6,0" VerticalAlignment="Center" Cursor="Hand" ToolTip="选择设备，回车打开所选设备" IsChecked="{Binding ProtocolBaseViewModel.IsSelected, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" Click="Selection_Click">
+     <CheckBox.Template><ControlTemplate TargetType="CheckBox">
+      <Border x:Name="CheckSurface" Width="16" Height="16" CornerRadius="4" Background="White" BorderBrush="#94ADC4" BorderThickness="1">
+       <TextBlock x:Name="CheckMark" Text="✓" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+      </Border><ControlTemplate.Triggers><Trigger Property="IsChecked" Value="True"><Setter TargetName="CheckSurface" Property="Background" Value="#258BFF"/><Setter TargetName="CheckSurface" Property="BorderBrush" Value="#258BFF"/><Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="CheckSurface" Property="BorderBrush" Value="#1559A8"/><Setter TargetName="CheckSurface" Property="BorderThickness" Value="2"/></Trigger></ControlTemplate.Triggers>
+     </ControlTemplate></CheckBox.Template>
+    </CheckBox>
+    <TextBlock x:Name="DeviceName" Grid.Column="1" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+    <TextBlock x:Name="AliasName" Grid.Column="2" FontSize="12" Foreground="#34516A" Margin="8,0,0,0" MaxWidth="96" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Visibility="Collapsed"/>
+    <TextBlock x:Name="StateDot" Grid.Column="3" Text="●" FontSize="10" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="#9DAEBD" ToolTip="未连接"/>
    </Grid>
+   <TextBlock x:Name="ConnectionDetails" FontSize="11" Foreground="#607B93" Height="20" Margin="8,0,8,0" TextTrimming="CharacterEllipsis" Visibility="Collapsed"/>
    <Grid x:Name="PreviewArea" Height="152" Background="#DFEAF3" MouseLeftButtonUp="Preview_MouseLeftButtonUp" Cursor="Hand" ToolTip="单击进入桌面">
-    <Image x:Name="PreviewImage" Stretch="Uniform"/>
+    <Image x:Name="DefaultWallpaper" Stretch="UniformToFill"/>
+    <Image x:Name="PreviewImage" Stretch="UniformToFill"/>
     <StackPanel x:Name="Empty" HorizontalAlignment="Center" VerticalAlignment="Center">
      <TextBlock Text="▣" FontSize="30" Foreground="#8BA6BB" HorizontalAlignment="Center"/>
      <TextBlock x:Name="EmptyText" Text="连接后保留最后画面" TextWrapping="Wrap" TextAlignment="Center" FontSize="11" Foreground="#698296" Margin="4,7,4,0"/>
     </StackPanel>
    </Grid>
-   <Grid Margin="8,7,8,5"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-    <Button Content="文件" Click="Files_Click" MaxWidth="52" HorizontalAlignment="Stretch" Margin="0,0,4,0" ToolTip="Windows 文件共享"/>
-    <Button Content="大图" Grid.Column="1" Click="Image_Click" MaxWidth="52" HorizontalAlignment="Stretch" Margin="0,0,4,0"/>
-    <Button x:Name="More" Content="···" Grid.Column="2" Click="More_Click" Width="27" HorizontalAlignment="Right" ToolTip="更多：重启、关机、连接设置"/>
+   <Grid Margin="8,7,8,7" Height="22"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <TextBlock x:Name="Timestamp" FontSize="10" Foreground="#70869A" VerticalAlignment="Center" Margin="0,0,6,0" TextTrimming="CharacterEllipsis"/>
+    <Button x:Name="FilesButton" Content="文件" Grid.Column="1" Click="Files_Click" Width="38" Margin="0,0,4,0" Padding="3,2" ToolTip="文件：Windows 文件共享"/>
+    <Button x:Name="LargeImageButton" Content="大图" Grid.Column="2" Click="Image_Click" Width="38" Margin="0,0,4,0" Padding="3,2" ToolTip="查看完整预览大图"/>
+    <Button x:Name="More" Content="···" Grid.Column="3" Click="More_Click" Width="25" Padding="3,2" ToolTip="更多：复制副本、连接设置、重启、关机"/>
    </Grid>
-   <TextBlock x:Name="Timestamp" FontSize="10" Foreground="#7E8F9F" Margin="9,0,9,7" Text="尚无预览" TextTrimming="CharacterEllipsis"/>
   </StackPanel>
  </Border>
+ <Border x:Name="SelectionGlow" BorderThickness="2" CornerRadius="7" BorderBrush="#258BFF" IsHitTestVisible="False">
+  <Border.Effect><DropShadowEffect Color="#258BFF" BlurRadius="12" ShadowDepth="0" Opacity="0.8"/></Border.Effect>
+  <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/>
+   <Style.Triggers><DataTrigger Binding="{Binding ProtocolBaseViewModel.IsSelected, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+  </Style></Border.Style>
+ </Border>
+ </Grid>
 </UserControl>
